@@ -71,8 +71,55 @@ section.visible {
   }
 }
 
+@keyframes drift {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(10px) translateY(-10px);
+  }
+  50% {
+    transform: translateX(-5px) translateY(-20px);
+  }
+  75% {
+    transform: translateX(-10px) translateY(-10px);
+  }
+}
+
+@keyframes underwater-sway {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(5px) rotate(1deg);
+  }
+}
+
+@keyframes caustics {
+  0% {
+    opacity: 0.3;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translateX(0);
+  }
+}
+
 .animate-border-flow {
   animation: border-flow 8s linear infinite;
+}
+
+.animate-drift {
+  animation: drift 8s ease-in-out infinite;
+}
+
+.animate-underwater-sway {
+  animation: underwater-sway 4s ease-in-out infinite;
 }
 
 .animate-float {

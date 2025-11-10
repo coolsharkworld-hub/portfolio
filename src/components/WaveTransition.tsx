@@ -12,7 +12,7 @@ export default function WaveTransition() {
 
     const setCanvasSize = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight * 2;
+      canvas.height = document.documentElement.scrollHeight;
     };
 
     setCanvasSize();
@@ -20,61 +20,103 @@ export default function WaveTransition() {
 
     let waveOffset = 0;
 
-    const drawWave = (y: number, amplitude: number, frequency: number, speed: number, color: string, alpha: number) => {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-
-      for (let x = 0; x <= canvas.width; x += 5) {
-        const waveY = y + Math.sin((x * frequency) + waveOffset * speed) * amplitude;
-        ctx.lineTo(x, waveY);
-      }
-
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.lineTo(0, canvas.height);
-      ctx.closePath();
-
-      ctx.fillStyle = color;
-      ctx.globalAlpha = alpha;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    };
-
     const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       const scrollY = window.scrollY;
       const heroHeight = window.innerHeight;
-      const transitionStart = heroHeight * 0.7;
-      const transitionEnd = heroHeight * 1.3;
+      const aboutStart = heroHeight;
+      const experienceStart = heroHeight * 2.5;
 
-      if (scrollY >= transitionStart - 200 && scrollY <= transitionEnd + 200) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const smoothTransitionStart = aboutStart + heroHeight * 0.3;
+      const smoothTransitionEnd = experienceStart - heroHeight * 0.3;
+      const transitionLength = smoothTransitionEnd - smoothTransitionStart;
 
-        const transitionProgress = Math.max(0, Math.min(1, (scrollY - transitionStart) / (transitionEnd - transitionStart)));
+      if (scrollY >= smoothTransitionStart - 300 && scrollY <= smoothTransitionEnd + 300) {
+        const transitionProgress = Math.max(
+          0,
+          Math.min(1, (scrollY - smoothTransitionStart) / transitionLength)
+        );
 
-        const waveY = transitionStart - scrollY + heroHeight * 0.85;
+        const waveY = smoothTransitionStart + transitionLength * transitionProgress;
 
-        const skyGradient = ctx.createLinearGradient(0, 0, 0, waveY + 100);
-        skyGradient.addColorStop(0, 'rgba(2, 6, 23, 0)');
-        skyGradient.addColorStop(1, `rgba(15, 23, 42, ${0.3 * transitionProgress})`);
-        ctx.fillStyle = skyGradient;
-        ctx.fillRect(0, 0, canvas.width, waveY + 100);
+        const topGradient = ctx.createLinearGradient(0, 0, 0, waveY);
+        topGradient.addColorStop(0, 'rgba(2, 6, 23, 0.1)');
+        topGradient.addColorStop(
+          0.5,
+          `rgba(15, 23, 42, ${0.2 * transitionProgress})`
+        );
+        topGradient.addColorStop(
+          1,
+          `rgba(30, 58, 95, ${0.3 * transitionProgress})`
+        );
+        ctx.fillStyle = topGradient;
+        ctx.fillRect(0, 0, canvas.width, waveY);
 
-        drawWave(waveY, 30, 0.005, 0.8, 'rgba(30, 58, 95, 0.6)', 0.4 + transitionProgress * 0.3);
-        drawWave(waveY + 15, 25, 0.007, 1.2, 'rgba(37, 99, 235, 0.4)', 0.3 + transitionProgress * 0.2);
-        drawWave(waveY + 30, 20, 0.009, 1.5, 'rgba(59, 130, 246, 0.3)', 0.2 + transitionProgress * 0.2);
-        drawWave(waveY + 45, 15, 0.011, 1.8, 'rgba(96, 165, 250, 0.2)', 0.15 + transitionProgress * 0.15);
+        ctx.beginPath();
+        ctx.moveTo(0, waveY);
 
-        const oceanGradient = ctx.createLinearGradient(0, waveY + 60, 0, canvas.height);
-        oceanGradient.addColorStop(0, `rgba(30, 58, 95, ${0.4 * transitionProgress})`);
-        oceanGradient.addColorStop(0.3, `rgba(15, 23, 42, ${0.5 * transitionProgress})`);
-        oceanGradient.addColorStop(1, `rgba(2, 6, 23, ${0.6 * transitionProgress})`);
+        for (let x = 0; x <= canvas.width; x += 2) {
+          const wave1 = Math.sin((x * 0.006 + waveOffset * 0.4) * Math.PI) * 30;
+          const wave2 =
+            Math.sin((x * 0.012 + waveOffset * 0.8) * Math.PI * 0.5) * 15;
+          const wave3 =
+            Math.sin((x * 0.003 + waveOffset * 0.2) * Math.PI) * 8;
+
+          const y = waveY + wave1 + wave2 + wave3;
+          ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(canvas.width, waveY + 80);
+        ctx.lineTo(canvas.width, waveY + 200);
+        ctx.lineTo(0, waveY + 200);
+        ctx.lineTo(0, waveY + 80);
+        ctx.closePath();
+
+        const waveGradient = ctx.createLinearGradient(0, waveY, 0, waveY + 200);
+        waveGradient.addColorStop(
+          0,
+          `rgba(30, 58, 95, ${0.5 * transitionProgress})`
+        );
+        waveGradient.addColorStop(
+          0.3,
+          `rgba(15, 23, 42, ${0.55 * transitionProgress})`
+        );
+        waveGradient.addColorStop(
+          0.7,
+          `rgba(2, 6, 23, ${0.6 * transitionProgress})`
+        );
+        waveGradient.addColorStop(
+          1,
+          `rgba(0, 0, 10, ${0.65 * transitionProgress})`
+        );
+
+        ctx.fillStyle = waveGradient;
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(59, 130, 246, ${0.2 * transitionProgress})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        const oceanGradient = ctx.createLinearGradient(
+          0,
+          waveY + 200,
+          0,
+          canvas.height
+        );
+        oceanGradient.addColorStop(
+          0,
+          `rgba(2, 6, 23, ${0.6 * transitionProgress})`
+        );
+        oceanGradient.addColorStop(
+          1,
+          `rgba(0, 0, 10, ${0.7 * transitionProgress})`
+        );
         ctx.fillStyle = oceanGradient;
-        ctx.fillRect(0, waveY + 60, canvas.width, canvas.height);
-
-        waveOffset += 0.02;
-      } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, waveY + 200, canvas.width, canvas.height);
       }
 
+      waveOffset += 0.025;
       requestAnimationFrame(animate);
     };
 
